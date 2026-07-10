@@ -1,0 +1,92 @@
+name: otel-custom-partition-test
+
+x-telemetrygen: &telemetrygen
+  image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.156.0
+  depends_on:
+    collector:
+      condition: service_healthy
+
+services:
+  kafka:
+    image: apache/kafka:3.9.1
+    hostname: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      # The test relies on the topic being created with multiple partitions
+      # by kafka-init; auto-creation would default to a single partition.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+
+  kafka-init:
+    image: apache/kafka:3.9.1
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create
+        --if-not-exists --topic otlp_spans --partitions 6 --replication-factor 1
+
+  collector:
+    build:
+      context: ..
+      dockerfile: collector/Dockerfile
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:13133/"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  telemetrygen-checkout:
+    <<: *telemetrygen
+    command: ["traces", "--otlp-endpoint", "collector:4317", "--otlp-insecure", "--service", "checkout", "--traces", "100", "--workers", "2", "--child-spans", "3"]
+  telemetrygen-payments:
+    <<: *telemetrygen
+    command: ["traces", "--otlp-endpoint", "collector:4317", "--otlp-insecure", "--service", "payments", "--traces", "100", "--workers", "2", "--child-spans", "3"]
+  telemetrygen-inventory:
+    <<: *telemetrygen
+    command: ["traces", "--otlp-endpoint", "collector:4317", "--otlp-insecure", "--service", "inventory", "--traces", "100", "--workers", "2", "--child-spans", "3"]
+  telemetrygen-shipping:
+    <<: *telemetrygen
+    command: ["traces", "--otlp-endpoint", "collector:4317", "--otlp-insecure", "--service", "shipping", "--traces", "100", "--workers", "2", "--child-spans", "3"]
+  telemetrygen-frontend:
+    <<: *telemetrygen
+    command: ["traces", "--otlp-endpoint", "collector:4317", "--otlp-insecure", "--service", "frontend", "--traces", "100", "--workers", "2", "--child-spans", "3"]
+  telemetrygen-recommendations:
+    <<: *telemetrygen
+    command: ["traces", "--otlp-endpoint", "collector:4317", "--otlp-insecure", "--service", "recommendations", "--traces", "100", "--workers", "2", "--child-spans", "3"]
+  telemetrygen-notifications:
+    <<: *telemetrygen
+    command: ["traces", "--otlp-endpoint", "collector:4317", "--otlp-insecure", "--service", "notifications", "--traces", "100", "--workers", "2", "--child-spans", "3"]
+  telemetrygen-auth:
+    <<: *telemetrygen
+    command: ["traces", "--otlp-endpoint", "collector:4317", "--otlp-insecure", "--service", "auth", "--traces", "100", "--workers", "2", "--child-spans", "3"]
+
+  verifier:
+    build:
+      context: verifier
+    profiles: [verify]
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: otlp_spans
+      QUIET_PERIOD: 10s
+      TIMEOUT: 2m

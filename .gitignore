@@ -1,0 +1,5 @@
+# OCB build output
+collector/_build/
+
+# compiled test binaries
+test/verifier/verifier

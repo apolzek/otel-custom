@@ -1,0 +1,25 @@
+dist:
+  module: github.com/apolzek/otel-custom/collector
+  name: otelcol-custom
+  description: OpenTelemetry Collector with kafkaexporter partition_traces_by_resource_attributes (contrib issue 49550)
+  version: 0.156.0-dev
+  output_path: ./_build
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.156.0
+
+processors:
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.156.0
+
+exporters:
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.156.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter v0.156.0
+
+extensions:
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.156.0
+
+# Point the kafka exporter at the local fork carrying the
+# partition_traces_by_resource_attributes feature. The path is relative to
+# dist::output_path (collector/_build).
+replaces:
+  - github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter => ../../components/kafkaexporter

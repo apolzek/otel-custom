@@ -1,0 +1,37 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Batching intentionally merges payloads from different services into a
+  # single ptrace.Traces; the kafka exporter must split them back out per
+  # resource when computing partition keys.
+  batch:
+    timeout: 1s
+
+exporters:
+  kafka:
+    brokers:
+      - ${env:KAFKA_BROKERS:-kafka:9092}
+    traces:
+      topic: otlp_spans
+    partition_traces_by_resource_attributes:
+      - service.name
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [kafka, debug]

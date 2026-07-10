@@ -1,0 +1,14 @@
+# Use this changelog schema: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/.chloggen/TEMPLATE.yaml
+# When upstreaming, copy this file to .chloggen/ in the contrib repo.
+change_type: enhancement
+component: kafkaexporter
+note: Add `partition_traces_by_resource_attributes` option to partition trace messages by the values of the listed resource attributes (e.g. `service.name`).
+issues: [49550]
+subtext: |
+  When `partition_traces_by_resource_attributes` is set to a non-empty list of
+  resource attribute keys, spans are grouped by resource and the Kafka record
+  key is set to a hash of the values of the configured resource attributes.
+  All spans whose resource shares the same values for these attributes are
+  routed to the same partition, enabling horizontally scaled stateful
+  consumers (e.g. the spanmetrics connector) behind Kafka.
+change_logs: []
