@@ -1,0 +1,283 @@
+{
+  "topic": "otlp_spans_multi",
+  "group_by": [
+    "service.name",
+    "deployment.environment",
+    "service.namespace",
+    "cloud.region"
+  ],
+  "consumed_at": "2026-07-10T18:44:17.931642568Z",
+  "records": 501,
+  "keyed_records": 501,
+  "records_per_partition": {
+    "0": 150,
+    "1": 100,
+    "2": 75,
+    "3": 50,
+    "4": 51,
+    "5": 75
+  },
+  "groups": [
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "prod",
+        "service.name": "app-01",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "staging",
+        "service.name": "app-01",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "prod",
+        "service.name": "app-02",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "1": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "staging",
+        "service.name": "app-02",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "3": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "prod",
+        "service.name": "app-03",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "4": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "staging",
+        "service.name": "app-03",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "prod",
+        "service.name": "app-04",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "staging",
+        "service.name": "app-04",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "3": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "prod",
+        "service.name": "app-05",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "1": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "staging",
+        "service.name": "app-05",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "2": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "prod",
+        "service.name": "app-06",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "1": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "staging",
+        "service.name": "app-06",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "5": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "prod",
+        "service.name": "app-07",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "staging",
+        "service.name": "app-07",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "5": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "prod",
+        "service.name": "app-08",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "1": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "staging",
+        "service.name": "app-08",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "4": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "prod",
+        "service.name": "app-09",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-2",
+        "deployment.environment": "staging",
+        "service.name": "app-09",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "2": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "prod",
+        "service.name": "app-10",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "5": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "cloud.region": "us-east-1",
+        "deployment.environment": "staging",
+        "service.name": "app-10",
+        "service.namespace": "shop"
+      },
+      "spans_per_partition": {
+        "2": 50
+      },
+      "spans": 50,
+      "ok": true
+    }
+  ],
+  "pass": true
+}

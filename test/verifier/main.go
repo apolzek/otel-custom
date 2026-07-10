@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Command verifier consumes OTLP trace messages from a Kafka topic and
-// verifies that every service.name is confined to exactly one partition,
-// i.e. that the kafka exporter's partition_traces_by_resource_attributes
-// feature routes all spans of a service to the same partition.
+// verifies that every group of resource attribute values (GROUP_BY, default
+// service.name) is confined to exactly one partition, i.e. that the kafka
+// exporter's partition_traces_by_resource_attributes feature routes all spans
+// sharing the configured attribute values to the same partition. Optionally
+// writes a JSON report (OUTPUT_JSON) for manual validation.
 package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -18,6 +21,24 @@ import (
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 )
+
+type groupReport struct {
+	Attributes map[string]string `json:"attributes"`
+	Partitions map[string]int    `json:"spans_per_partition"`
+	Spans      int               `json:"spans"`
+	OK         bool              `json:"ok"`
+}
+
+type report struct {
+	Topic               string         `json:"topic"`
+	GroupBy             []string       `json:"group_by"`
+	ConsumedAt          time.Time      `json:"consumed_at"`
+	Records             int            `json:"records"`
+	KeyedRecords        int            `json:"keyed_records"`
+	RecordsPerPartition map[string]int `json:"records_per_partition"`
+	Groups              []groupReport  `json:"groups"`
+	Pass                bool           `json:"pass"`
+}
 
 func env(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
@@ -41,6 +62,8 @@ func durationEnv(key string, fallback time.Duration) time.Duration {
 func main() {
 	brokers := strings.Split(env("KAFKA_BROKERS", "kafka:9092"), ",")
 	topic := env("KAFKA_TOPIC", "otlp_spans")
+	groupBy := strings.Split(env("GROUP_BY", "service.name"), ",")
+	outputJSON := os.Getenv("OUTPUT_JSON")
 	quietPeriod := durationEnv("QUIET_PERIOD", 15*time.Second)
 	timeout := durationEnv("TIMEOUT", 3*time.Minute)
 
@@ -56,14 +79,15 @@ func main() {
 	defer client.Close()
 
 	unmarshaler := &ptrace.ProtoUnmarshaler{}
-	// service.name -> partition -> span count
-	services := map[string]map[int32]int{}
+	// composite group key -> partition -> span count
+	groups := map[string]map[int32]int{}
+	groupAttrs := map[string]map[string]string{}
 	partitions := map[int32]int{}
 	records := 0
 	keyedRecords := 0
 
-	fmt.Printf("consuming topic %q from %v (quiet period %s, timeout %s)\n",
-		topic, brokers, quietPeriod, timeout)
+	fmt.Printf("consuming topic %q from %v, grouping by %v (quiet period %s, timeout %s)\n",
+		topic, brokers, groupBy, quietPeriod, timeout)
 
 	deadline := time.Now().Add(timeout)
 	lastRecord := time.Now()
@@ -93,18 +117,26 @@ func main() {
 				return
 			}
 			for _, rs := range traces.ResourceSpans().All() {
-				service := "<no service.name>"
-				if v, ok := rs.Resource().Attributes().Get("service.name"); ok {
-					service = v.Str()
+				attrs := map[string]string{}
+				keyParts := make([]string, 0, len(groupBy))
+				for _, attrKey := range groupBy {
+					value := "<absent>"
+					if v, ok := rs.Resource().Attributes().Get(attrKey); ok {
+						value = v.AsString()
+					}
+					attrs[attrKey] = value
+					keyParts = append(keyParts, attrKey+"="+value)
 				}
+				key := strings.Join(keyParts, "|")
 				spans := 0
 				for _, ss := range rs.ScopeSpans().All() {
 					spans += ss.Spans().Len()
 				}
-				if services[service] == nil {
-					services[service] = map[int32]int{}
+				if groups[key] == nil {
+					groups[key] = map[int32]int{}
+					groupAttrs[key] = attrs
 				}
-				services[service][r.Partition] += spans
+				groups[key][r.Partition] += spans
 			}
 		})
 	}
@@ -117,42 +149,80 @@ func main() {
 		os.Exit(1)
 	}
 
-	names := make([]string, 0, len(services))
-	for name := range services {
-		names = append(names, name)
+	keys := make([]string, 0, len(groups))
+	for key := range groups {
+		keys = append(keys, key)
 	}
-	sort.Strings(names)
+	sort.Strings(keys)
 
-	failed := false
-	fmt.Printf("%-24s %-12s %s\n", "SERVICE.NAME", "PARTITIONS", "SPANS PER PARTITION")
-	for _, name := range names {
-		parts := services[name]
+	rep := report{
+		Topic:               topic,
+		GroupBy:             groupBy,
+		ConsumedAt:          time.Now().UTC(),
+		Records:             records,
+		KeyedRecords:        keyedRecords,
+		RecordsPerPartition: map[string]int{},
+		Pass:                true,
+	}
+	for id, n := range partitions {
+		rep.RecordsPerPartition[fmt.Sprintf("%d", id)] = n
+	}
+
+	fmt.Printf("%-72s %-12s %s\n", "GROUP", "PARTITIONS", "SPANS PER PARTITION")
+	for _, key := range keys {
+		parts := groups[key]
 		ids := make([]int32, 0, len(parts))
 		for id := range parts {
 			ids = append(ids, id)
 		}
 		sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 		var detail []string
+		spans := 0
+		perPartition := map[string]int{}
 		for _, id := range ids {
 			detail = append(detail, fmt.Sprintf("p%d=%d", id, parts[id]))
+			spans += parts[id]
+			perPartition[fmt.Sprintf("%d", id)] = parts[id]
+		}
+		ok := len(parts) == 1
+		if !ok {
+			rep.Pass = false
 		}
 		status := "OK"
-		if len(parts) != 1 {
+		if !ok {
 			status = "FAIL"
-			failed = true
 		}
-		fmt.Printf("%-24s %-12d %-40s [%s]\n", name, len(parts), strings.Join(detail, " "), status)
+		fmt.Printf("%-72s %-12d %-24s [%s]\n", key, len(parts), strings.Join(detail, " "), status)
+		rep.Groups = append(rep.Groups, groupReport{
+			Attributes: groupAttrs[key],
+			Partitions: perPartition,
+			Spans:      spans,
+			OK:         ok,
+		})
+	}
+
+	if outputJSON != "" {
+		data, err := json.MarshalIndent(rep, "", "  ")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to marshal report: %v\n", err)
+			os.Exit(2)
+		}
+		if err := os.WriteFile(outputJSON, append(data, '\n'), 0o644); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to write %s: %v\n", outputJSON, err)
+			os.Exit(2)
+		}
+		fmt.Printf("\nJSON report written to %s\n", outputJSON)
 	}
 
 	fmt.Println()
-	if failed {
-		fmt.Println("FAIL: at least one service.name was spread across multiple partitions")
+	if !rep.Pass {
+		fmt.Println("FAIL: at least one group was spread across multiple partitions")
 		os.Exit(1)
 	}
 	if len(partitions) < 2 {
-		fmt.Println("WARN: all services landed on a single partition; " +
+		fmt.Println("WARN: all groups landed on a single partition; " +
 			"partition affinity holds, but the run cannot demonstrate distribution " +
-			"(try more services or fewer partitions)")
+			"(try more groups or fewer partitions)")
 	}
-	fmt.Println("PASS: every service.name is confined to exactly one partition")
+	fmt.Println("PASS: every group is confined to exactly one partition")
 }

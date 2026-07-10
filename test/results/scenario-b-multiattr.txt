@@ -1,0 +1,29 @@
+consuming topic "otlp_spans_multi" from [kafka:9092], grouping by [service.name deployment.environment service.namespace cloud.region] (quiet period 10s, timeout 2m0s)
+
+consumed 501 records (501 with a partition key) across 6 partitions
+
+GROUP                                                                    PARTITIONS   SPANS PER PARTITION
+service.name=app-01|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-2 1            p0=50                    [OK]
+service.name=app-01|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-2 1            p0=50                    [OK]
+service.name=app-02|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-1 1            p1=50                    [OK]
+service.name=app-02|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-1 1            p3=50                    [OK]
+service.name=app-03|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-2 1            p4=50                    [OK]
+service.name=app-03|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-2 1            p0=50                    [OK]
+service.name=app-04|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-1 1            p0=50                    [OK]
+service.name=app-04|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-1 1            p3=50                    [OK]
+service.name=app-05|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-2 1            p1=50                    [OK]
+service.name=app-05|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-2 1            p2=50                    [OK]
+service.name=app-06|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-1 1            p1=50                    [OK]
+service.name=app-06|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-1 1            p5=50                    [OK]
+service.name=app-07|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-2 1            p0=50                    [OK]
+service.name=app-07|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-2 1            p5=50                    [OK]
+service.name=app-08|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-1 1            p1=50                    [OK]
+service.name=app-08|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-1 1            p4=50                    [OK]
+service.name=app-09|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-2 1            p0=50                    [OK]
+service.name=app-09|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-2 1            p2=50                    [OK]
+service.name=app-10|deployment.environment=prod|service.namespace=shop|cloud.region=us-east-1 1            p5=50                    [OK]
+service.name=app-10|deployment.environment=staging|service.namespace=shop|cloud.region=us-east-1 1            p2=50                    [OK]
+
+JSON report written to /results/scenario-b-multiattr.json
+
+PASS: every group is confined to exactly one partition

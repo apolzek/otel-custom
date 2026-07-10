@@ -1,0 +1,220 @@
+{
+  "topic": "otlp_spans",
+  "group_by": [
+    "service.name"
+  ],
+  "consumed_at": "2026-07-10T18:44:07.569622983Z",
+  "records": 501,
+  "keyed_records": 501,
+  "records_per_partition": {
+    "0": 100,
+    "1": 100,
+    "2": 50,
+    "3": 126,
+    "4": 75,
+    "5": 50
+  },
+  "groups": [
+    {
+      "attributes": {
+        "service.name": "svc-01"
+      },
+      "spans_per_partition": {
+        "3": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-02"
+      },
+      "spans_per_partition": {
+        "5": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-03"
+      },
+      "spans_per_partition": {
+        "5": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-04"
+      },
+      "spans_per_partition": {
+        "4": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-05"
+      },
+      "spans_per_partition": {
+        "4": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-06"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-07"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-08"
+      },
+      "spans_per_partition": {
+        "2": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-09"
+      },
+      "spans_per_partition": {
+        "3": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-10"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-11"
+      },
+      "spans_per_partition": {
+        "1": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-12"
+      },
+      "spans_per_partition": {
+        "3": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-13"
+      },
+      "spans_per_partition": {
+        "2": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-14"
+      },
+      "spans_per_partition": {
+        "3": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-15"
+      },
+      "spans_per_partition": {
+        "1": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-16"
+      },
+      "spans_per_partition": {
+        "0": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-17"
+      },
+      "spans_per_partition": {
+        "1": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-18"
+      },
+      "spans_per_partition": {
+        "1": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-19"
+      },
+      "spans_per_partition": {
+        "4": 50
+      },
+      "spans": 50,
+      "ok": true
+    },
+    {
+      "attributes": {
+        "service.name": "svc-20"
+      },
+      "spans_per_partition": {
+        "3": 50
+      },
+      "spans": 50,
+      "ok": true
+    }
+  ],
+  "pass": true
+}

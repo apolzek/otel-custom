@@ -5,6 +5,11 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  # Second ingest port for the multi-attribute partitioning scenario.
+  otlp/multiattr:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4319
 
 processors:
   # Batching intentionally merges payloads from different services into a
@@ -21,6 +26,19 @@ exporters:
       topic: otlp_spans
     partition_traces_by_resource_attributes:
       - service.name
+  # Same broker, different topic, partition key composed from service.name
+  # plus three extra resource attributes (like the loadbalancing exporter's
+  # routing_attributes).
+  kafka/multiattr:
+    brokers:
+      - ${env:KAFKA_BROKERS:-kafka:9092}
+    traces:
+      topic: otlp_spans_multi
+    partition_traces_by_resource_attributes:
+      - service.name
+      - deployment.environment
+      - service.namespace
+      - cloud.region
   debug:
     verbosity: basic
 
@@ -35,3 +53,7 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [kafka, debug]
+    traces/multiattr:
+      receivers: [otlp/multiattr]
+      processors: [batch]
+      exporters: [kafka/multiattr, debug]

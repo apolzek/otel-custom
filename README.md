@@ -86,6 +86,25 @@ cd test
 KEEP=1 ./run-test.sh   # keeps kafka/collector running for inspection
 ```
 
+There is also a scale test covering the two key modes:
+
+- **Scenario A**: 1000 spans across **20 distinct `service.name`** →
+  topic `otlp_spans`, partition key `[service.name]`;
+- **Scenario B**: 1000 spans across **10 `service.name` × 2 environments**,
+  each resource carrying 3 extra attributes → topic `otlp_spans_multi`,
+  partition key `[service.name, deployment.environment, service.namespace,
+  cloud.region]` — proving attribute composition: the same `service.name` in
+  different environments gets independent keys, while each combination stays
+  on exactly one partition.
+
+The verifier writes JSON reports to `test/results/` for manual consumer-side
+validation, and posts the evidence to Discord when `DISCORD_WEBHOOK` is set:
+
+```sh
+cd test
+DISCORD_WEBHOOK=https://discord.com/api/webhooks/... ./run-scale-test.sh
+```
+
 Expected verifier output:
 
 ```

@@ -37,8 +37,12 @@ services:
         condition: service_healthy
     entrypoint: ["/bin/sh", "-c"]
     command:
-      - /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create
+      - >
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create
         --if-not-exists --topic otlp_spans --partitions 6 --replication-factor 1
+        &&
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create
+        --if-not-exists --topic otlp_spans_multi --partitions 6 --replication-factor 1
 
   collector:
     build:
@@ -50,6 +54,7 @@ services:
     ports:
       - "4317:4317"
       - "4318:4318"
+      - "4319:4319"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:13133/"]
       interval: 2s
@@ -85,8 +90,12 @@ services:
     build:
       context: verifier
     profiles: [verify]
+    volumes:
+      - ./results:/results
     environment:
       KAFKA_BROKERS: kafka:9092
-      KAFKA_TOPIC: otlp_spans
-      QUIET_PERIOD: 10s
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-otlp_spans}
+      GROUP_BY: ${GROUP_BY:-service.name}
+      OUTPUT_JSON: ${OUTPUT_JSON:-}
+      QUIET_PERIOD: ${QUIET_PERIOD:-10s}
       TIMEOUT: 2m

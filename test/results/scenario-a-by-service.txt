@@ -1,0 +1,96 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 630B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 455B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/golang:1.25-bookworm
+#3 ...
+
+#4 [internal] load metadata for docker.io/library/alpine:3.21
+#4 DONE 0.5s
+
+#3 [internal] load metadata for docker.io/library/golang:1.25-bookworm
+#3 DONE 0.5s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [stage-1 1/2] FROM docker.io/library/alpine:3.21@sha256:48b0309ca019d89d40f670aa1bc06e426dc0931948452e8491e3d65087abc07d
+#6 resolve docker.io/library/alpine:3.21@sha256:48b0309ca019d89d40f670aa1bc06e426dc0931948452e8491e3d65087abc07d 0.0s done
+#6 DONE 0.0s
+
+#7 [build 1/6] FROM docker.io/library/golang:1.25-bookworm@sha256:a9c020ee3d1508c7be5435c262434e3d3fc1d0e76a11afeb9ddae7d60bc86aa4
+#7 resolve docker.io/library/golang:1.25-bookworm@sha256:a9c020ee3d1508c7be5435c262434e3d3fc1d0e76a11afeb9ddae7d60bc86aa4 0.0s done
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 6.82kB done
+#8 DONE 0.0s
+
+#9 [build 2/6] WORKDIR /src
+#9 CACHED
+
+#10 [build 3/6] COPY go.mod go.sum ./
+#10 CACHED
+
+#11 [build 4/6] RUN --mount=type=cache,target=/go/pkg/mod go mod download
+#11 CACHED
+
+#12 [build 5/6] COPY main.go ./
+#12 DONE 0.0s
+
+#13 [build 6/6] RUN --mount=type=cache,target=/go/pkg/mod     --mount=type=cache,target=/root/.cache/go-build     CGO_ENABLED=0 go build -o /verifier .
+#13 DONE 0.5s
+
+#6 [stage-1 1/2] FROM docker.io/library/alpine:3.21@sha256:48b0309ca019d89d40f670aa1bc06e426dc0931948452e8491e3d65087abc07d
+#6 CACHED
+
+#14 [stage-1 2/2] COPY --from=build /verifier /verifier
+#14 DONE 0.0s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 0.3s done
+#15 exporting manifest sha256:f65d449ae723a0927feb973ac62b987304118e03ae50b6f680dc7c8e554ddcf1 done
+#15 exporting config sha256:a3b860cc7c4826bc71abc88c27e441ae834ff4d85293aa91c0d12badc30afbac done
+#15 exporting attestation manifest sha256:2a2ddb96a9db10d2785eb56481285f250624677fe01fad2a35ccc675226fe2bd 0.0s done
+#15 exporting manifest list sha256:ee2baf80e818049d6fddb50a7ee5aa8a06351697fcbe6e1201857aa1c119cd84 done
+#15 naming to docker.io/library/otel-custom-partition-test-verifier:latest done
+#15 unpacking to docker.io/library/otel-custom-partition-test-verifier:latest 0.0s done
+#15 DONE 0.4s
+
+#16 resolving provenance for metadata file
+#16 DONE 0.0s
+consuming topic "otlp_spans" from [kafka:9092], grouping by [service.name] (quiet period 10s, timeout 2m0s)
+
+consumed 501 records (501 with a partition key) across 6 partitions
+
+GROUP                                                                    PARTITIONS   SPANS PER PARTITION
+service.name=svc-01                                                      1            p3=50                    [OK]
+service.name=svc-02                                                      1            p5=50                    [OK]
+service.name=svc-03                                                      1            p5=50                    [OK]
+service.name=svc-04                                                      1            p4=50                    [OK]
+service.name=svc-05                                                      1            p4=50                    [OK]
+service.name=svc-06                                                      1            p0=50                    [OK]
+service.name=svc-07                                                      1            p0=50                    [OK]
+service.name=svc-08                                                      1            p2=50                    [OK]
+service.name=svc-09                                                      1            p3=50                    [OK]
+service.name=svc-10                                                      1            p0=50                    [OK]
+service.name=svc-11                                                      1            p1=50                    [OK]
+service.name=svc-12                                                      1            p3=50                    [OK]
+service.name=svc-13                                                      1            p2=50                    [OK]
+service.name=svc-14                                                      1            p3=50                    [OK]
+service.name=svc-15                                                      1            p1=50                    [OK]
+service.name=svc-16                                                      1            p0=50                    [OK]
+service.name=svc-17                                                      1            p1=50                    [OK]
+service.name=svc-18                                                      1            p1=50                    [OK]
+service.name=svc-19                                                      1            p4=50                    [OK]
+service.name=svc-20                                                      1            p3=50                    [OK]
+
+JSON report written to /results/scenario-a-by-service.json
+
+PASS: every group is confined to exactly one partition
